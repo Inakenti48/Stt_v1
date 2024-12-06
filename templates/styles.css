@@ -1,0 +1,50 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+    color: #333;
+}
+header {
+    text-align: center;
+}
+main {
+    display: flex;
+    justify-content: center;
+}
+
+/* Container for the graph and buttons */
+.graph-container {
+    position: relative;  /* Positioning context for absolute positioning of buttons */
+    width: 800px;  /* Set the width of the graph */
+    height: 600px;  /* Set the height of the graph */
+    margin: 20px auto;  /* Center the container */
+}
+
+/* Style for the buttons */
+.overlay-button {
+    position: absolute;  /* Absolute positioning */
+    top: 10px;  /* Distance from the top */
+    left: 10px;  /* Distance from the left */
+    padding: 10px 20px;  /* Padding for the buttons */
+    background-color: rgba(255, 255, 255, 0.8);  /* Semi-transparent background */
+    border: 1px solid #ccc;  /* Border for the buttons */
+    border-radius: 5px;  /* Rounded corners */
+    cursor: pointer;  /* Change cursor to pointer */
+    z-index: 10;  /* Ensure the button is on top of the graph */
+}
+
+.timeframe-btn {
+  height: 30px;  /* Adjust height */
+  width: 100px;   /* Adjust width */
+  padding: 5px 10px;  /* Adjust padding to make text fit well */
+}
+
+.btn-group {
+    flex: none;
+}
+
+
+.overlay-button:hover {
+    background-color: rgba(255, 255, 255, 1);  /* Change background on hover */
+}

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свечи и Стакан Ордеров</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black ;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+<!--            margin-bottom: 4px;-->
+        }
+        .order-book {
+            display: flex;
+            justify-content: space-between; /* Раздвигает таблицы на всю ширину */
+        }
+        .order-table {
+            width: 48%; /* Определяет ширину обеих таблиц */
+            margin: 0 1%; /* Отступ между таблицами */
+            background: black; /* Белый фон для таблиц */
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Легкая тень для визуального отделения */
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%; /* Таблицы будут занимать всю ширину блока */
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: black;
+            position: sticky;
+            top: 0;
+        }
+        .ask-header {
+            background-color: red; /* Красный для заголовка Asks */
+            color: gray; /* Цвет текста заголовка */
+            padding: 10px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+        .bid-header {
+            background-color: lightblue; /* Голубой для заголовка Bids */
+            color: black; /* Цвет текста заголовка */
+            padding: 10px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+        .ask-price, .ask-volume {
+            color: red; /* Красный для цен и объемов на продажу */
+        }
+        .bid-price, .bid-volume {
+            color: blue; /* Синий для цен и объемов на покупку */
+        }
+        footer {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .header-row-style {
+            background-color: #101014;
+            margin-left: 0.5px;
+            margin-right: 0.5px;
+            padding-top: 5px;
+            padding-bottom: 10px;
+        }
+
+        .symbol-dropdown {
+            height: auto;
+            overflow-y: auto;
+            position: absolute;
+            display: block;
+            z-index: 1;
+        }
+
+        /* Custom sharp-edged black button */
+        .btn-black {
+            background-color: #101014;   /* Black background */
+            color: #aeb1b7;            /* Custom text color */
+            border-radius: 0;          /* Remove rounded corners */
+            border: 0px ;   /* No border */
+        }
+
+        /* Hover effect to make the button brighter */
+        .btn-black:hover {
+            filter: brightness(1.2);  /* Slightly brighten the button on hover */
+            background-color: black;  /* Ensure background stays black */
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <header>
+        <div class="row g-3 header-row-style">
+            <div class="btn-group me-2" role="group" aria-label="Second group" style="background-color: #101014;">
+                <div style="display: inline">
+                    <button type="submit" class="btn btn-black" onclick="changeTF15min()">15 мин</button>
+                </div>
+                <div style="display: inline">
+                    <button type="submit" class="btn btn-black" onclick="changeTF1hour()">1 час</button>
+                </div>
+
+                <div class="dropdown" style="display: inline;">
+                    <select id="timeframe" class="btn btn-black dropdown-toggle" aria-labelledby="dropdownMenuButton1">
+                        <option value="5m" class="dropdown-item">5 мин</option>
+                        <option value="15m" class="dropdown-item" selected>15 мин</option>
+                        <option value="30m" class="dropdown-item">30 мин</option>
+                        <option value="1h" class="dropdown-item">1 час</option>
+                        <option value="2h" class="dropdown-item">2 часа</option>
+                        <option value="4h" class="dropdown-item">4 часа</option>
+                    </select>
+                </div>
+
+                <div class="dropdown" style="display: inline;">
+                    <select id="symbol" class="btn btn-black dropdown-toggle symbol-dropdown" aria-labelledby="dropdownMenuButton1">
+                        {% for symbol in symbols %}
+                            <option value="{{ symbol|escape }}" {% if symbol == selected_option_symbol %}selected{% endif %}>{{ symbol|escape }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="chart-and-order-book">
+            <div id="chart">
+<!--                {{ candlestick_div | safe }}-->
+            </div>
+            <div class="order-book">
+                <h2 id="order-book-header"></h2>
+
+                <div class="order-table">
+                    <h3 class="ask-header">Сделки на продажу (Asks)</h3>
+                    <table id="asks-table">
+                        <tr>
+                            <th>Цена</th>
+                            <th>Объем</th>
+                        </tr>
+                        {% for ask in asks %}
+                        <tr>
+                            <td style="color: red;">{{ ask[0] }}</td>
+                            <td style="color: red;">{{ ask[1] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+
+                <div class="order-table">
+                    <h3 class="bid-header">Сделки на покупку (Bids)</h3>
+                    <table id="bids-table">
+                        <tr>
+                            <th>Цена</th>
+                            <th>Объем</th>
+                        </tr>
+                        {% for bid in bids %}
+                        <tr>
+                            <td style="color: blue;">{{ bid[0] }}</td>
+                            <td style="color: blue;">{{ bid[1] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <footer>
+                <p id="total_ask_value_p">Общий объем сделок на продажу: </p>
+                <p id="total_bid_value_p">Общий объем сделок на покупку: </p>
+                <p id="nzvolume_p">Общий ненулевой объем: </p>
+            </footer>
+        </div>
+    </main>
+    <script>
+        // allows instantly load the chart with a preselected symbol
+        window.onload = function() {
+            const symbols_dropdown = document.getElementById('symbol');
+            symbols_dropdown.value = "{{ selected_option_symbol }}";
+        }
+
+        function parseDate(dateString) {
+            return new Date(dateString).toISOString();  // Converts to ISO format
+        }
+
+        const chart = document.getElementById('chart');
+        let xRange;
+        let yRange;
+
+        function updateOrdersTable(newOrdersList, tableId) {
+            const table = document.getElementById(tableId);
+            table.innerHTML = '';
+
+            newOrdersList.forEach(orderInfo => {
+                const orderItem = document.createElement('tr');
+
+                const priceCell = document.createElement('td');
+                priceCell.className = 'ask-price';
+                priceCell.innerText = orderInfo[0];
+
+                const volumeCell = document.createElement('td');
+                volumeCell.className = 'ask-volume';
+                volumeCell.innerText = orderInfo[1];
+
+                orderItem.appendChild(priceCell);
+                orderItem.appendChild(volumeCell);
+                table.appendChild(orderItem);
+            });
+        }
+
+        // Fetch and render the chart based on selected timeframe
+        let currentData, currentLayout;
+        function fetchData(timeframe, symbol) {
+            fetch(`/create_candle_plot?timeframe=${timeframe}&symbol=${symbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    const graph = JSON.parse(data);
+                    if (graph) {
+                        document.getElementById("total_ask_value_p").innerText = "Общий объем сделок на продажу: " + graph.total_ask_value;
+                        document.getElementById("total_bid_value_p").innerText = "Общий объем сделок на покупку: " + graph.total_bid_value;
+                        document.getElementById("nzvolume_p").innerText = "Общий ненулевой объём: " + graph.nzvolume;
+                        updateOrdersTable(graph.asks, "asks-table");
+                        updateOrdersTable(graph.bids, "bids-table");
+                    }
+                    if (!currentData || (!xRange || !yRange)) {
+                        currentData = graph.data;
+                        currentLayout = graph.layout;
+
+                        console.log("currentData: " + currentData);
+                        console.log("currentLayout: " + currentLayout);
+
+                        Plotly.newPlot('chart', currentData, currentLayout);
+                        xRange = chart.layout.xaxis.range;
+                        yRange = chart.layout.yaxis.range;
+                    } else {
+                        Plotly.react('chart', graph.data, graph.layout).then(() => {
+                            Plotly.relayout(chart, {
+                                'xaxis.range': xRange,
+                                'yaxis.range': yRange
+                            });
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching data: ', error));
+
+
+<!--            fetch('/update_chart')-->
+<!--                .then(response => response.json())-->
+<!--                .then(data => {-->
+<!--                    // Update only the text of the annotation-->
+<!--                    Plotly.relayout('chart', {'annotations[0].text': data.annotation_text});-->
+<!--                    // Update the layout with multiple shapes-->
+<!--                    console.log("data.tickvals: " + data.tickvals);-->
+<!--                    console.log("data.ticktext: " + data.ticktext);-->
+<!--                    console.log("data.range: " + data.range)-->
+<!--                    console.log("TF test: " + data.tf);-->
+<!--                    data.shapes.forEach(shape => {-->
+<!--                        console.log(shape);-->
+<!--                        shape.x0 = parseDate(shape.x0);-->
+<!--                        shape.x1 = parseDate(shape.x1);-->
+<!--                    });-->
+<!--                    Plotly.relayout('chart', {-->
+<!--                        'shapes': data.shapes,-->
+<!--                        'annotations[0].text': data.annotation_text,-->
+<!--                        'xaxis.tickval': data.tickvals,-->
+<!--                        'xaxis.ticktex': data.ticktext,-->
+<!--                        'xaxis.range': [parseDate(data.range[0]), parseDate(data.range[1])]-->
+<!--                        });-->
+<!--                })-->
+<!--                .catch(error => console.error('UpdateError: ', error));-->
+        }
+
+        // Initial load with default timeframe
+        const defaultTimeframe = "15m";
+        const defaultSymbol = "BTC/USDT";
+        document.getElementById("order-book-header").innerText = "Стакан ордеров для " + defaultSymbol;
+
+        let timeframeSelect = document.getElementById("timeframe");
+        let symbolSelect = document.getElementById("symbol");
+        timeframeSelect.value = defaultTimeframe;
+        symbolSelect.value = defaultSymbol;
+
+        document.getElementById("symbol").value = symbolSelect.value;
+        document.getElementById("timeframe").value = timeframeSelect.value;
+        fetchData(timeframeSelect.value, symbolSelect.value);
+
+        // Set up auto-refresh based on the selected timeframe (adjust time as needed)
+        let refreshInterval = setInterval(() => fetchData(timeframeSelect.value, symbolSelect.value), 15000);
+
+        document.getElementById("timeframe").addEventListener("change", (event) => {
+            clearInterval(refreshInterval);  // Clear the previous interval
+            timeframe = event.target.value;
+            xRange = null;
+            yRange = null;
+            fetchData(timeframe, symbolSelect.value);
+            refreshInterval = setInterval(() => fetchData(timeframeSelect.value, symbolSelect.value), 15000);  // Reset interval
+        });
+
+        document.getElementById("symbol").addEventListener("change", (event) => {
+            clearInterval(refreshInterval);  // Clear the previous interval
+            symbol = event.target.value;
+            xRange = null;
+            yRange = null;
+            fetchData(timeframeSelect.value, symbol);
+            document.getElementById("order-book-header").innerText = "Стакан ордеров для " + symbol;
+            refreshInterval = setInterval(() => fetchData(timeframeSelect.value, symbolSelect.value), 15000);  // Reset interval
+        });
+
+        const selectElement = document.getElementById('symbol');
+
+        // Expand to show multiple options on focus
+        selectElement.addEventListener('focus', function () {
+          this.setAttribute('size', '5'); // Set number of visible options
+        });
+
+        // Collapse back to single option view when focus is lost
+        selectElement.addEventListener('blur', function ()   {
+          this.removeAttribute('size'); // Revert to default single-option display
+        });
+
+        // Function to collapse dropdown and revert positioning
+        function closeDropdown() {
+          selectElement.removeAttribute('size');
+          selectElement.classList.remove('expanded'); // Remove overlay behavior
+        }
+
+        // Event listener for option selection
+        selectElement.addEventListener('change', function () {
+          closeDropdown(); // Close the dropdown when an option is selected
+        });
+
+        selectElement.addEventListener('blur', function () {
+          if (this.getAttribute('size')) {
+            closeDropdown(); // Close dropdown if still expanded
+          }
+        });
+
+        function changeTF15min() {
+            const newTF = "15m";
+            document.getElementById("timeframe").value = newTF;
+            fetchData(newTF, symbolSelect.value);
+        }
+
+        function changeTF1hour() {
+            const newTF = "1h";
+            document.getElementById("timeframe").value = newTF;
+            fetchData(newTF, symbolSelect.value);
+        }
+    </script>
+</body>
+</html>

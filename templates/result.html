@@ -1,0 +1,31 @@
+<h2>Продажа (Asks)</h2>
+<table>
+    <tr>
+        <th>Цена</th>
+        <th>Количество</th>
+        <th>Общая стоимость</th>
+    </tr>
+    {% for ask in asks %}
+    <tr style="color: {{ ask[2] | calculate_color(max_ask_value, true) }}">
+        <td>{{ ask[0] }}</td>
+        <td>{{ ask[1] }}</td>
+        <td>{{ ask[2] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2>Покупка (Bids)</h2>
+<table>
+    <tr>
+        <th>Цена</th>
+        <th>Количество</th>
+        <th>Общая стоимость</th>
+    </tr>
+    {% for bid in bids %}
+    <tr style="color: {{ bid[2] | calculate_color(max_bid_value, false) }}">
+        <td>{{ bid[0] }}</td>
+        <td>{{ bid[1] }}</td>
+        <td>{{ bid[2] }}</td>
+    </tr>
+    {% endfor %}
+</table>
