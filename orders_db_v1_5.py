@@ -8,6 +8,7 @@ from re import search
 from time import sleep
 from datetime import datetime, timezone
 from multiprocessing import Pool
+from concurrent.futures import ThreadPoolExecutor
 from pprint import pprint
 
 
@@ -319,14 +320,16 @@ def main(symbol_):
 
 if __name__ == "__main__":
     # symbols = get_binance_futures_symbols()
-    symbols = ("BTCUSDT", "ETHUSDT")
+    symbols = ("BTCUSDT", "ETHUSDT", "SOLUSDT")
 
     # asks_test = get_orders_dict(cursor_asks, "BTCUSDT")
     # print(asks_test)
 
     while True:
-        with Pool() as pool:
-            pool.map(main, symbols)
+        with ThreadPoolExecutor() as executor:
+            results = list(executor.map(main, symbols))
+        # with Pool() as pool:
+        #     pool.map(main, symbols)
             # try:
             #     pool.map(main, symbols)
             # except Exception as e:
