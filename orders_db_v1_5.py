@@ -326,10 +326,11 @@ if __name__ == "__main__":
 
     while True:
         with Pool() as pool:
-            try:
-                pool.map(main, symbols)
-            except Exception as e:
-                print(f"\n\tThe connection was terminated!\nError: {e}")
+            pool.map(main, symbols)
+            # try:
+            #     pool.map(main, symbols)
+            # except Exception as e:
+            #     print(f"\n\tThe connection was terminated!\nError: {e}")
         sleep(10)
 
         # TEST
