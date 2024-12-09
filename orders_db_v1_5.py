@@ -34,9 +34,10 @@ ROUNDING_CONSTANTS = {
 def create_databases_by_symbols(cursor, symbols_: list | tuple):
     for symbol in symbols_:
         symbol = symbol.replace('/', '_')
+        # AUTO_INCREMENT or AUTOINCREMENT
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS orders_{symbol} (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id INTEGER PRIMARY KEY AUTO_INCREMENT,
                 price REAL,
                 volume REAL,
                 color VARCHAR(30)
@@ -325,11 +326,10 @@ if __name__ == "__main__":
 
     while True:
         with Pool() as pool:
-            pool.map(main, symbols)
-            # try:
-            #     pool.map(main, symbols)
-            # except Exception as e:
-            #     print(f"\n\tThe connection was terminated!\nError: {e}")
+            try:
+                pool.map(main, symbols)
+            except Exception as e:
+                print(f"\n\tThe connection was terminated!\nError: {e}")
         sleep(10)
 
         # TEST
