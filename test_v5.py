@@ -258,8 +258,7 @@ def add_date(dates_dict_, date_str_, time_str_, row_) -> None:
 def add_date_advanced(dates_dict_, date_str_, time_str_, row_, time_count_) -> None:
     global time_count
     if date_str_ not in dates_dict_.keys():
-        dates_dict_[date_str_] = [[f"{datetime.strftime(datetime.strptime(date_str_, '%Y-%m-%d'),
-                                                        '%d %b')}"], [row_["timestamp"]]]
+        dates_dict_[date_str_] = [[f"{datetime.strftime(datetime.strptime(date_str_, '%Y-%m-%d'), '%d %b')}"], [row_["timestamp"]]]
         time_count = 0
     else:
         if time_count == time_count_:
