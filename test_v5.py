@@ -13,7 +13,7 @@ import pandas as pd
 from orders_db_v1_5 import *
 
 app = Flask(__name__)
-locale.setlocale(locale.LC_TIME, "ru_RU.UTF-8")
+# locale.setlocale(locale.LC_TIME, "ru_RU.UTF-8")
 
 
 def make_null_after_t(raw_datetime: str) -> str: return f"{raw_datetime.split('T')[0]}T00:00:00Z"
