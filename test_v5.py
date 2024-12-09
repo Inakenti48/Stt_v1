@@ -67,7 +67,7 @@ EXCHANGE = ccxt.bybit(
 SYMBOLS_CONSTANTS = {
     "BTCUSDT": [10000, 4],  # 1
     "ETHUSDT": [7000, 0.3],
-    "SOLUSDT": [5000, 0.05]
+    # "SOLUSDT": [5000, 0.05]
 }
 
 asks_for_nz = []
@@ -533,7 +533,7 @@ def get_updated_text():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     global asks_for_nz, bids_for_nz, total_ask_value, total_bid_value, nzVolume
-    symbols = ("BTC/USDT", "ETH/USDT", "SOL/USDT")
+    symbols = ("BTC/USDT", "ETH/USDT")
     # symbols = get_binance_futures_symbols()
     selected_option_symbol = "BTC/USDT"
     print("RENDER:")
