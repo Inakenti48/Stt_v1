@@ -17,7 +17,7 @@ BASE_URL = "https://api.binance.com"
 ROUNDING_CONSTANTS = {
     "BTCUSDT": -1,
     "ETHUSDT": 0,
-    "SOLUSDT": 1
+    # "SOLUSDT": 1
 }
 
 
@@ -268,7 +268,7 @@ def fetch_data(conn_asks,
 
 def main(symbol_):
     # symbols = get_binance_futures_symbols()
-    symbols_ = ("BTCUSDT", "ETHUSDT", "SOLUSDT")
+    symbols_ = ("BTCUSDT", "ETHUSDT")
 
     DB1_URL = os.getenv("MYSQL_DB1_URL")
     DB2_URL = os.getenv("MYSQL_DB2_URL")
@@ -319,7 +319,7 @@ def main(symbol_):
 
 if __name__ == "__main__":
     # symbols = get_binance_futures_symbols()
-    symbols = ("BTCUSDT", "ETHUSDT", "SOLUSDT")
+    symbols = ("BTCUSDT", "ETHUSDT")
 
     # asks_test = get_orders_dict(cursor_asks, "BTCUSDT")
     # print(asks_test)
