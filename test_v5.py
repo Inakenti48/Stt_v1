@@ -252,8 +252,7 @@ def add_date(dates_dict_, date_str_, time_str_, row_) -> None:
         dates_dict_[date_str_][1].append(row_["timestamp"])
     else:
         # в ином случае, добавить новый ключ для этой даты
-        dates_dict_[date_str_] = [[f"{datetime.strftime(datetime.strptime(date_str_, '%Y-%m-%d'),
-                                                        '%d %b')}"], [row_["timestamp"]]]
+        dates_dict_[date_str_] = [[f"{datetime.strftime(datetime.strptime(date_str_, '%Y-%m-%d'), '%d %b')}"], [row_["timestamp"]]]
 
 
 def add_date_advanced(dates_dict_, date_str_, time_str_, row_, time_count_) -> None:
