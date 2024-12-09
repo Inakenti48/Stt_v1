@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from multiprocessing import Pool
 from pprint import pprint
 
+
 BASE_URL = "https://api.binance.com"
 
 
@@ -272,7 +273,7 @@ def main(symbol_):
     DB2_URL = os.getenv("MYSQL_DB2_URL")
 
     # 3306
-    orders_asks = connector.connect(
+    conn_asks = connector.connect(
         host="mysql.railway.internal",
         user="root",
         password="wjSXUlNJVChjUwEbflMFtqwcNPGJhmIC",
@@ -280,18 +281,22 @@ def main(symbol_):
     )
 
     # 3306
-    orders_bids = connector.connect(
+    conn_bids = connector.connect(
         host="mysql-os9e.railway.internal",
         user="root",
         password="GcBreYeqWjpuPUtVYqjeDwSUQvWxedUo",
         database="railway"
     )
 
-    conn_asks = sqlite3.connect("orders_asks.db")
     cursor_asks = conn_asks.cursor()
+    cursor_bids = conn_asks.cursor()
 
-    conn_bids = sqlite3.connect("orders_bids.db")
-    cursor_bids = conn_bids.cursor()
+
+    # conn_asks = sqlite3.connect("orders_asks.db")
+    # cursor_asks = conn_asks.cursor()
+    #
+    # conn_bids = sqlite3.connect("orders_bids.db")
+    # cursor_bids = conn_bids.cursor()
 
     create_databases_by_symbols(cursor_asks, symbols_)
     create_databases_by_symbols(cursor_bids, symbols_)
