@@ -33,6 +33,6 @@ conn_bids = connector.connect(
 cursor_asks = conn_asks.cursor()
 cursor_bids = conn_asks.cursor()
 
-for symbol in ("BTCUSDT", "ETHUSDT"):
+for symbol in ("BTCUSDT", "ETHUSDT", "SOLUSDT"):
     cursor_asks.execute(f"DROP TABLE IF EXISTS orders_{symbol}")
     cursor_bids.execute(f"DROP TABLE IF EXISTS orders_{symbol}")
