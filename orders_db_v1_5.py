@@ -121,7 +121,18 @@ def get_latest_price(symbol="BTCUSDT"):
     params = {
         "symbol": symbol
     }
-    response = requests.get(BASE_URL + endpoint, params=params, headers={"User-Agent": "Mozilla/5.0"})
+    proxies = {
+        "http": "socks4://138.199.184.14:8089",
+        "https": "socks4://138.199.184.14:8089"
+    }
+    response = requests.get(
+        BASE_URL + endpoint,
+        params=params,
+        headers={
+            "User-Agent": "Mozilla/5.0"
+        },
+        proxies=proxies
+    )
     response.raise_for_status()
     return round(float(response.json().get("price")), 4)
 
