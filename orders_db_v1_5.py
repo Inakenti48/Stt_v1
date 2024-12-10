@@ -122,8 +122,8 @@ def get_latest_price(symbol="BTCUSDT"):
         "symbol": symbol
     }
     proxies = {
-        "http": "socks4://138.199.184.14:8089",
-        "https": "socks4://138.199.184.14:8089"
+        "http": "socks4://165.73.128.177:56975",
+        "https": "socks4://165.73.128.177:56975"
     }
     response = requests.get(
         BASE_URL + endpoint,
